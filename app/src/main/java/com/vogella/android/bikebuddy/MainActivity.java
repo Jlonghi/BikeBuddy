@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
                 handleSelectBikeClick();
             }
         });
+
+        //TODO: 10/23/2017 add create bike button
         /* example of how to use the database class to insert a bike,
          update a bikes distance and get the information back from the database
 
