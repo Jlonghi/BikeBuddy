@@ -39,7 +39,10 @@ public class BikeDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(BikeTableContract.BikeEntry.COLUMN_NAME_NAME, bikeName);
         values.put(BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE, 0);
-        return db.insert(BikeTableContract.BikeEntry.TABLE_NAME, null, values);
+        values.put(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DISTANCE, 0);
+        values.put(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DURATION, 0);
+        long id = db.insert(BikeTableContract.BikeEntry.TABLE_NAME, null, values);
+        return id;
     }
 
     //update an existings bikes distance
@@ -56,7 +59,9 @@ public class BikeDbHelper extends SQLiteOpenHelper {
         String[] projection = {
                 BikeTableContract.BikeEntry._ID,
                 BikeTableContract.BikeEntry.COLUMN_NAME_NAME,
-                BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE
+                BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE,
+                BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DISTANCE,
+                BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DURATION
         };
 
         String selection = BikeTableContract.BikeEntry.COLUMN_NAME_NAME + "=?";
@@ -81,9 +86,16 @@ public class BikeDbHelper extends SQLiteOpenHelper {
                     cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_NAME));
             long distance = cursor.getLong(
                     cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE));
+            long longestDistance = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DISTANCE));
+            long longestDuration = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DURATION));
             bike.putLong("id", itemId);
             bike.putString("bikeName", name);
             bike.putLong("distance", distance);
+            bike.putLong("longestDistance", longestDistance);
+            bike.putLong("longestDuration", longestDuration);
+
         }
         cursor.close();
 
@@ -94,7 +106,9 @@ public class BikeDbHelper extends SQLiteOpenHelper {
         String[] projection = {
                 BikeTableContract.BikeEntry._ID,
                 BikeTableContract.BikeEntry.COLUMN_NAME_NAME,
-                BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE
+                BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE,
+                BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DISTANCE,
+                BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DURATION
         };
 
         String sortOrder = BikeTableContract.BikeEntry.COLUMN_NAME_NAME + " DESC";
@@ -118,10 +132,15 @@ public class BikeDbHelper extends SQLiteOpenHelper {
                     cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_NAME));
             long distance = cursor.getLong(
                     cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE));
-
+            long longestDistance = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DISTANCE));
+            long longestDuration = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DURATION));
             bike.putLong("id", itemId);
             bike.putString("bikeName", name);
             bike.putLong("distance", distance);
+            bike.putLong("longestDistance", longestDistance);
+            bike.putLong("longestDuration", longestDuration);
             bikes.add(bike);
         }
         cursor.close();

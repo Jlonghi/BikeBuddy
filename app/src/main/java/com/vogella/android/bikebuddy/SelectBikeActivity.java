@@ -1,5 +1,6 @@
 package com.vogella.android.bikebuddy;
 
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class selectBike extends AppCompatActivity {
+public class SelectBikeActivity extends AppCompatActivity {
     List<Bundle> bikes;
 
     // TODO: 10/23/2017 select bike click
@@ -21,7 +22,8 @@ public class selectBike extends AppCompatActivity {
     }
     // TODO: 10/23/2017 create bike click
     public void createNewBike(){
-
+        Intent selectIntent = new Intent(this, CreateBikeActivity.class);
+        startActivity(selectIntent);
     }
 
     //load the bikes from the database into the view
