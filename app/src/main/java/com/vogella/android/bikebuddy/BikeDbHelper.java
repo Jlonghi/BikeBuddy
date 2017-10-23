@@ -82,12 +82,50 @@ public class BikeDbHelper extends SQLiteOpenHelper {
             long distance = cursor.getLong(
                     cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE));
             bike.putLong("id", itemId);
-            bike.putString("bikeName", bikeName);
+            bike.putString("bikeName", name);
             bike.putLong("distance", distance);
         }
         cursor.close();
 
         return bike;
 
+    }
+    public  List<Bundle> getAllBikes( SQLiteDatabase db) {
+        String[] projection = {
+                BikeTableContract.BikeEntry._ID,
+                BikeTableContract.BikeEntry.COLUMN_NAME_NAME,
+                BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE
+        };
+
+        String sortOrder = BikeTableContract.BikeEntry.COLUMN_NAME_NAME + " DESC";
+
+        Cursor cursor = db.query(
+                BikeTableContract.BikeEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+        List<Bundle> bikes = new ArrayList<Bundle>();
+        Bundle bike;
+        while(cursor.moveToNext()) {
+            bike = new Bundle();
+            long itemId = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry._ID));
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_NAME));
+            long distance = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(BikeTableContract.BikeEntry.COLUMN_NAME_DISTANCE));
+
+            bike.putLong("id", itemId);
+            bike.putString("bikeName", name);
+            bike.putLong("distance", distance);
+            bikes.add(bike);
+        }
+        cursor.close();
+
+        return bikes;
     }
 }
