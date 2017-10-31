@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SelectBikeActivity" />
-        <activity android:name=".CreateBikeActivity"></activity>
+        <activity android:name=".CreateBikeActivity" />
+        <activity android:name=".OptionActivity"></activity>
     </application>
 
 </manifest>

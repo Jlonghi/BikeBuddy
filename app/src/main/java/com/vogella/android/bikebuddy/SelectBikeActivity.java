@@ -19,6 +19,11 @@ public class SelectBikeActivity extends AppCompatActivity {
     // TODO: 10/23/2017 select bike click
     public void selectBike(String bikeName){
         //start activity here and send in bike name
+        BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Intent selectIntent = new Intent(this, OptionActivity.class);
+        selectIntent.putExtras(mDbHelper.getBike(bikeName,db));
+        startActivity(selectIntent);
     }
     // TODO: 10/23/2017 create bike click
     public void createNewBike(){
