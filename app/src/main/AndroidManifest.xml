@@ -18,7 +18,9 @@
         </activity>
         <activity android:name=".SelectBikeActivity" />
         <activity android:name=".CreateBikeActivity" />
-        <activity android:name=".OptionActivity"></activity>
+        <activity android:name=".OptionActivity" />
+        <activity android:name=".StatsActivity" />
+        <activity android:name=".MapActivity"></activity>
     </application>
 
 </manifest>

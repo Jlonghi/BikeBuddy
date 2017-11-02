@@ -9,11 +9,15 @@ import android.widget.Button;
 public class OptionActivity extends AppCompatActivity {
 
     public void handleStartRideButton(){
-
+        Intent selectIntent = new Intent(this, MapActivity.class);
+        selectIntent.putExtras(getIntent().getExtras());
+        startActivity(selectIntent);
     }
 
     public void handleStatsButton(){
-
+        Intent selectIntent = new Intent(this, StatsActivity.class);
+        selectIntent.putExtras(getIntent().getExtras());
+        startActivity(selectIntent);
     }
 
     public void handleChangeRideButton(){
