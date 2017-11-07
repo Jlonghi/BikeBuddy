@@ -11,32 +11,51 @@ import android.widget.Button;
 public class MapActivity extends AppCompatActivity {
 
     long sTime;
+    long dist = 0;
 
     public void handleEndRideButton(){
         long eTime = SystemClock.elapsedRealtime();
         long dTime = eTime - sTime;
         long elapsed = dTime / 1000;
         Bundle bike = getIntent().getExtras();
+        Bundle bike2 = new Bundle();
+        bike2.putLong("id", bike.getLong("id"));
+        bike2.putString("bikeName", bike.getString("bikeName"));
         if(elapsed > bike.getLong("longestDuration")){
             BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
             SQLiteDatabase db = mDbHelper.getWritableDatabase();
             mDbHelper.updateBikeDuration(bike.getString("bikeName"), elapsed, db);
             db.close();
-            Bundle bike2 = new Bundle();
-            bike2.putLong("id", bike.getLong("id"));
-            bike2.putString("bikeName", bike.getString("bikeName"));
-            bike2.putLong("distance", bike.getLong("distance"));
-            bike2.putLong("longestDistance", bike.getLong("longestDistance"));
             bike2.putLong("longestDuration", elapsed);
-
-            Intent selectIntent = new Intent(this, OptionActivity.class);
-            selectIntent.putExtras(bike2);
-            startActivity(selectIntent);
+        }
+        else{
+            bike2.putLong("longestDuration", bike.getLong("longestDuration"));
         }
 
+        if(dist > bike.getLong("longestDistance")){
+            BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+            mDbHelper.updateBikeLongestDistance(bike.getString("bikeName"), (int)dist, db);
+            db.close();
+            bike2.putLong("longestDistance", dist);
+        }
+        else{
+            bike2.putLong("longestDistance", bike.getLong("longestDistance"));
+        }
+
+        BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        mDbHelper.updateBikeDistance(bike.getString("bikeName"), (int)(dist + bike.getLong("distance")), db);
+        db.close();
+
+        bike2.putLong("distance", bike.getLong("distance") + dist);
         Intent selectIntent = new Intent(this, OptionActivity.class);
         selectIntent.putExtras(bike);
         startActivity(selectIntent);
+    }
+
+    public void handleSearchButton(){
+
     }
 
     @Override
@@ -50,6 +69,14 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 handleEndRideButton();
+            }
+        });
+
+        Button search = (Button) findViewById(R.id.searchBtn);
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleSearchButton();
             }
         });
     }

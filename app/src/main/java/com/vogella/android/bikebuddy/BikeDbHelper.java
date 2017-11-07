@@ -54,6 +54,15 @@ public class BikeDbHelper extends SQLiteOpenHelper {
         return db.update(BikeTableContract.BikeEntry.TABLE_NAME, values, strFilter, args);
     }
 
+    //update an existings bikes longest distance
+    public int updateBikeLongestDistance(String bikeName, int distance, SQLiteDatabase db){
+        String strFilter = BikeTableContract.BikeEntry.COLUMN_NAME_NAME+"=?";
+        ContentValues values = new ContentValues();
+        values.put(BikeTableContract.BikeEntry.COLUMN_NAME_LONGEST_DISTANCE, distance);
+        String[] args = new String[]{bikeName};
+        return db.update(BikeTableContract.BikeEntry.TABLE_NAME, values, strFilter, args);
+    }
+
     //update an existings bikes duration
     public int updateBikeDuration(String bikeName, long duration, SQLiteDatabase db){
         String strFilter = BikeTableContract.BikeEntry.COLUMN_NAME_NAME+"=?";

@@ -17,4 +17,38 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.034"
         app:layout_constraintHorizontal_bias="0.054" />
+
+    <TextView
+        android:id="@+id/speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="- -"
+        android:textColor="@android:color/background_dark"
+        app:layout_constraintRight_toLeftOf="@+id/searchBtn"
+        app:layout_constraintLeft_toRightOf="@+id/endR"
+        app:layout_constraintHorizontal_bias="0.223"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="32dp" />
+
+    <Button
+        android:id="@+id/searchBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/searchType"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.034" />
+
+    <Spinner
+        android:id="@+id/searchType"
+        android:layout_width="92dp"
+        android:layout_height="28dp"
+        app:layout_constraintRight_toLeftOf="@+id/searchBtn"
+        app:layout_constraintLeft_toRightOf="@+id/speed"
+        app:layout_constraintHorizontal_bias="0.47"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.074" />
 </android.support.constraint.ConstraintLayout>
