@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">BikeBuddy</string>
+
+    <string-array name="searches">
+        <item>Bike Stores</item>
+        <item>Indoor Parking</item>
+        <item>Outdoor Parking</item>
+        <item>Ring Parking</item>
+    </string-array>
 </resources>

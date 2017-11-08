@@ -6,7 +6,9 @@ import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -79,5 +81,10 @@ public class MapActivity extends AppCompatActivity {
                 handleSearchButton();
             }
         });
+
+        Spinner spinner = (Spinner) findViewById(R.id.searchType);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.searches, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        spinner.setAdapter(adapter);
     }
 }
