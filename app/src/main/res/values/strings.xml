@@ -7,4 +7,5 @@
         <item>Outdoor Parking</item>
         <item>Ring Parking</item>
     </string-array>
+    <string name="title_activity_other_maps">Map</string>
 </resources>
