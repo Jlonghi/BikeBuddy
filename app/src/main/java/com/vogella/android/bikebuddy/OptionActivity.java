@@ -36,13 +36,20 @@ public class OptionActivity extends AppCompatActivity {
         name.setText("Bike Name: " + bike.get("bikeName"));
 
         TextView dist = (TextView)findViewById(R.id.distance);
-        dist.setText("Total Distance Traveled: " + bike.get("distance"));
+        dist.setText("Total Distance Traveled: " + bike.get("distance") + " km");
 
         TextView longDist = (TextView)findViewById(R.id.LongDistance);
-        longDist.setText("Farthest Individual Ride: " + bike.get("longestDistance"));
+        longDist.setText("Farthest Individual Ride: " + bike.get("longestDistance") + " km");
 
         TextView longDur = (TextView)findViewById(R.id.longDur);
-        longDur.setText("Longest Individual Ride: " + bike.get("longestDuration"));
+        if(bike.getLong("longestDuration") > 60){
+            long min = bike.getLong("longestDuration") / 60;
+            long sec = bike.getLong("longestDuration") % 60;
+            longDur.setText("Longest Individual Ride: " + min + " Minutes and " + sec + " Seconds");
+        }
+        else {
+            longDur.setText("Longest Individual Ride: " + bike.get("longestDuration") + " Seconds");
+        }
 
         Button startRide = (Button) findViewById(R.id.StartButton);
         startRide.setOnClickListener(new View.OnClickListener() {
