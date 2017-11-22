@@ -33,7 +33,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     long dist = 0;
     private GoogleMap mMap;
 
-    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+    LocationManager locationManager;
 
     LocationListener locationListener = new LocationListener() {
         @Override
@@ -111,6 +111,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         sTime = SystemClock.elapsedRealtime();
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionCheck != PackageManager.PERMISSION_GRANTED){
