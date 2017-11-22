@@ -16,7 +16,6 @@ import java.util.List;
 public class SelectBikeActivity extends AppCompatActivity {
     List<Bundle> bikes;
 
-    // TODO: 10/23/2017 select bike click
     public void selectBike(String bikeName){
         //start activity here and send in bike name
         BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
@@ -25,7 +24,6 @@ public class SelectBikeActivity extends AppCompatActivity {
         selectIntent.putExtras(mDbHelper.getBike(bikeName,db));
         startActivity(selectIntent);
     }
-    // TODO: 10/23/2017 create bike click
     public void createNewBike(){
         Intent selectIntent = new Intent(this, CreateBikeActivity.class);
         startActivity(selectIntent);

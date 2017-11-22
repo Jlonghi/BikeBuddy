@@ -119,7 +119,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         bike2.putLong("distance", bike.getLong("distance") + dist);
         Intent selectIntent = new Intent(this, OptionActivity.class);
-        selectIntent.putExtras(bike);
+        selectIntent.putExtras(bike2);
         startActivity(selectIntent);
     }
 

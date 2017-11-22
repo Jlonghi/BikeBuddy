@@ -32,6 +32,9 @@ public class OptionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_option);
 
         Bundle bike = getIntent().getExtras();
+
+        System.out.println("Bike: " + bike.get("longestDuration"));
+
         TextView name = (TextView)findViewById(R.id.bName);
         name.setText("Bike Name: " + bike.get("bikeName"));
 
