@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +35,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     long dist = 0;
     private GoogleMap mMap;
 
+    Location firstLoc, secondLoc;
+
     //declaring locationManager for location updating
     LocationManager locationManager;
 
@@ -42,7 +45,26 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         @Override
         public void onLocationChanged(Location location) {
             //update map and stats here
+            //move camera
+            LatLng currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLoc));
+            //reset variables
 
+            secondLoc = location;
+
+            if(firstLoc != null) {
+                //calculate distance traveled in 1 second
+                float distance = firstLoc.distanceTo(secondLoc);
+
+                //set speed
+                TextView speed = (TextView) findViewById(R.id.speed);
+                speed.setText(distance + " m/s");
+
+                //update total distance
+                dist += distance;
+            }
+
+            firstLoc = secondLoc;
         }
 
         @Override
@@ -131,6 +153,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         //defining the location manager
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 3, locationListener);
+        firstLoc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
         //performing the required permission checks for the app
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
