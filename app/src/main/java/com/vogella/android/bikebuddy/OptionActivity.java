@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 public class OptionActivity extends AppCompatActivity {
 
+    //navigating to the map activity
     public void handleStartRideButton(){
         Intent selectIntent = new Intent(this, MapActivity.class);
         selectIntent.putExtras(getIntent().getExtras());
@@ -21,6 +22,7 @@ public class OptionActivity extends AppCompatActivity {
         startActivity(selectIntent);
     }*/
 
+   //go back to the main menu
     public void handleChangeRideButton(){
         Intent selectIntent = new Intent(this, MainActivity.class);
         startActivity(selectIntent);
@@ -31,6 +33,7 @@ public class OptionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_option);
 
+        //setting the values of the textviews
         Bundle bike = getIntent().getExtras();
         TextView name = (TextView)findViewById(R.id.bName);
         name.setText("Bike Name: " + bike.get("bikeName"));
@@ -51,6 +54,7 @@ public class OptionActivity extends AppCompatActivity {
             longDur.setText("Longest Individual Ride: " + bike.get("longestDuration") + " Seconds");
         }
 
+        //setting the on click listeners
         Button startRide = (Button) findViewById(R.id.StartButton);
         startRide.setOnClickListener(new View.OnClickListener() {
             @Override

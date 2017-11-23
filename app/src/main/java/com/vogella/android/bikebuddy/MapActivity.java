@@ -29,12 +29,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    //declaring the key variables
     long sTime;
     long dist = 0;
     private GoogleMap mMap;
 
+    //declaring locationManager for location updating
     LocationManager locationManager;
 
+    //defining locationListener to track the persons location
     LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
@@ -61,6 +64,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     //not recognizing requestLocationUpdates for some reason
     //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
+    //updating the data when the user ends their ride
     public void handleEndRideButton(){
         long eTime = SystemClock.elapsedRealtime();
         long dTime = eTime - sTime;
@@ -98,12 +102,25 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         bike2.putLong("distance", bike.getLong("distance") + dist);
         Intent selectIntent = new Intent(this, OptionActivity.class);
-        selectIntent.putExtras(bike);
+        selectIntent.putExtras(bike2);
         startActivity(selectIntent);
     }
 
+    //perform search on the map
     public void handleSearchButton(){
+        Spinner spinner = (Spinner)findViewById(R.id.searchType);
+        if(spinner.getSelectedItem().toString() == "Bike Stores"){
 
+        }
+        else if(spinner.getSelectedItem().toString() == "Indoor Parking"){
+
+        }
+        else if(spinner.getSelectedItem().toString() == "Outdoor Parking"){
+
+        }
+        else if(spinner.getSelectedItem().toString() == "Ring Parking"){
+
+        }
     }
 
     @Override
@@ -112,8 +129,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
         sTime = SystemClock.elapsedRealtime();
 
+        //defining the location manager
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
+        //performing the required permission checks for the app
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionCheck != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 12345);
@@ -121,6 +140,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             System.out.println("permission was already granted! Getting Location...");
         }
 
+        //setting the on click listeners
         Button endRide = (Button) findViewById(R.id.endR);
         endRide.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,16 +157,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
         });
 
+        //defining the values for the spinner
         Spinner spinner = (Spinner) findViewById(R.id.searchType);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.searches, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spinner.setAdapter(adapter);
 
+        //setting up the map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
+    //setting map default location
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
