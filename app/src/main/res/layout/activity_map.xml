@@ -63,6 +63,7 @@
         android:layout_height="28dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.47"
         app:layout_constraintLeft_toRightOf="@+id/speed"
