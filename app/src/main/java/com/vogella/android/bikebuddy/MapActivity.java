@@ -3,32 +3,50 @@ package com.vogella.android.bikebuddy;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     //declaring the key variables
     long sTime;
@@ -37,9 +55,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     Location firstLoc, secondLoc;
 
-    //declaring locationManager for location updating
-    LocationManager locationManager;
-
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    LocationRequest mLocationRequest;
+    boolean mRequestingLocationUpdates;
     //defining locationListener to track the persons location
     LocationListener locationListener = new LocationListener() {
         @Override
@@ -82,9 +100,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         }
     };
-
-    //not recognizing requestLocationUpdates for some reason
-    //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+    private LocationCallback mLocationCallback;
 
     //updating the data when the user ends their ride
     public void handleEndRideButton(){
@@ -95,9 +111,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         Bundle bike2 = new Bundle();
         bike2.putLong("id", bike.getLong("id"));
         bike2.putString("bikeName", bike.getString("bikeName"));
+
+        BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
         if(elapsed > bike.getLong("longestDuration")){
-            BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
-            SQLiteDatabase db = mDbHelper.getWritableDatabase();
             mDbHelper.updateBikeDuration(bike.getString("bikeName"), elapsed, db);
             db.close();
             bike2.putLong("longestDuration", elapsed);
@@ -107,8 +125,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
 
         if(dist > bike.getLong("longestDistance")){
-            BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
-            SQLiteDatabase db = mDbHelper.getWritableDatabase();
             mDbHelper.updateBikeLongestDistance(bike.getString("bikeName"), (int)dist, db);
             db.close();
             bike2.putLong("longestDistance", dist);
@@ -117,8 +133,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             bike2.putLong("longestDistance", bike.getLong("longestDistance"));
         }
 
-        BikeDbHelper mDbHelper = new BikeDbHelper(getApplicationContext());
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         mDbHelper.updateBikeDistance(bike.getString("bikeName"), (int)(dist + bike.getLong("distance")), db);
         db.close();
 
@@ -145,19 +159,69 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
     }
 
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private void startLocationUpdates() {
+        try {
+            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback,
+                    null /* Looper */);
+        }catch(SecurityException e){
+
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         sTime = SystemClock.elapsedRealtime();
 
-        //defining the location manager
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 3, locationListener);
-        firstLoc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        createLocationRequest();
 
-        //performing the required permission checks for the app
+        mRequestingLocationUpdates = true;
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                //put update functions in here
+                for (Location location : locationResult.getLocations()) {
+                    LatLng curr = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curr, 15));
+
+                    //speed and distance calculation
+                    secondLoc = location;
+
+                    if(firstLoc != null) {
+                        //calculate distance traveled in 1 second
+                        float distance = firstLoc.distanceTo(secondLoc);
+                        System.out.println("distance: " + distance);
+                        //set speed
+                        TextView speed = (TextView) findViewById(R.id.speed);
+                        speed.setText(distance + " m/s");
+
+                        //update total distance
+                        dist += distance;
+                    }
+
+                    firstLoc = secondLoc;
+                }
+            };
+        };
+//        performing the required permission checks for the app
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionCheck != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 12345);
@@ -197,15 +261,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     //setting map default location
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             return;
         }
+
+        mMap = googleMap;
+
+        mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                // Got last known location. In some rare situations this can be null.
+                if (location != null) {
+                    LatLng curr = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curr, 15));
+                }
+            }
+        });
         mMap.setMyLocationEnabled(true);
     }
 }
