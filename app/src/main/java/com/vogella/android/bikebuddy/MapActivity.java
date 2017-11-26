@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -45,6 +46,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
+import java.io.File;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -146,13 +149,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void handleSearchButton(){
         Spinner spinner = (Spinner)findViewById(R.id.searchType);
         if(spinner.getSelectedItem().toString() == "Bike Stores"){
-
+            Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
+            toast.show();
         }
         else if(spinner.getSelectedItem().toString() == "Indoor Parking"){
-
+            Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
+            toast.show();
         }
         else if(spinner.getSelectedItem().toString() == "Outdoor Parking"){
-
+            Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
+            toast.show();
         }
         else if(spinner.getSelectedItem().toString() == "Ring Parking"){
 
