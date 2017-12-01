@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -42,12 +44,21 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.util.Iterator;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -161,7 +172,45 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             toast.show();
         }
         else if(spinner.getSelectedItem().toString() == "Ring Parking"){
+            //fetching file
+            File inputWorkbook = new File(String.valueOf(R.raw.installs_2011));
+            if(inputWorkbook.exists()){
+                try {
+                    //conveerting file to input stream
+                    FileInputStream myInput = new FileInputStream(inputWorkbook);
+                    //making file system
+                    POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
+                    //making the file now recognized as an excel workbook
+                    HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                    //getting the first sheet int the workbook
+                    HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                    //getting an iterator to select each row
+                    Iterator rowIterator = mySheet.rowIterator();
 
+                    while(rowIterator.hasNext()){
+                        //fetching row
+                        HSSFRow row = (HSSFRow) rowIterator.next();
+                        //getting cell
+                        Iterator cellIterator = row.cellIterator();
+                        //setting values
+                        HSSFCell cellAddress = (HSSFCell) cellIterator.next();
+                        HSSFCell cellSpaces = (HSSFCell) cellIterator.next();
+                        Geocoder geocoder = new Geocoder(this);
+                        Address address = (Address) geocoder.getFromLocationName(cellAddress.toString(),5);
+                        if(address != null) {
+                            address.getLatitude();
+                            address.getLongitude();
+                            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                            //placing marker
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .title(cellAddress.toString() + " has " + cellSpaces.toString() + " spaces"));
+                        }
+                    }
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
