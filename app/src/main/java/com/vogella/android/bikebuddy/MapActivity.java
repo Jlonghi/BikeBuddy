@@ -58,6 +58,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Iterator;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -131,7 +132,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         if(elapsed > bike.getLong("longestDuration")){
             mDbHelper.updateBikeDuration(bike.getString("bikeName"), elapsed, db);
-            db.close();
             bike2.putLong("longestDuration", elapsed);
         }
         else{
@@ -140,7 +140,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         if(dist > bike.getLong("longestDistance")){
             mDbHelper.updateBikeLongestDistance(bike.getString("bikeName"), (int)dist, db);
-            db.close();
             bike2.putLong("longestDistance", dist);
         }
         else{
@@ -148,6 +147,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
 
         mDbHelper.updateBikeDistance(bike.getString("bikeName"), (int)(dist + bike.getLong("distance")), db);
+
         db.close();
 
         bike2.putLong("distance", bike.getLong("distance") + dist);
@@ -171,15 +171,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
             toast.show();
         }
-        else if(spinner.getSelectedItem().toString() == "Ring Parking"){
+        else if(spinner.getSelectedItem().toString().equals("Ring Parking")){
             //fetching file
             File inputWorkbook = new File(String.valueOf(R.raw.installs_2011));
-            if(inputWorkbook.exists()){
+            InputStream is = getResources().openRawResource(R.raw.installs_2011);
+
+            //if(inputWorkbook.exists()){
                 try {
                     //conveerting file to input stream
-                    FileInputStream myInput = new FileInputStream(inputWorkbook);
+                    //FileInputStream myInput = new FileInputStream(inputWorkbook);
                     //making file system
-                    POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
+
+                    POIFSFileSystem myFileSystem = new POIFSFileSystem(is);
                     //making the file now recognized as an excel workbook
                     HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
                     //getting the first sheet int the workbook
@@ -196,10 +199,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HSSFCell cellAddress = (HSSFCell) cellIterator.next();
                         HSSFCell cellSpaces = (HSSFCell) cellIterator.next();
                         Geocoder geocoder = new Geocoder(this);
-                        Address address = (Address) geocoder.getFromLocationName(cellAddress.toString(),5);
+                        Address address = (Address) geocoder.getFromLocationName(cellAddress.toString(),5).get(0);
                         if(address != null) {
-                            address.getLatitude();
-                            address.getLongitude();
                             LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                             //placing marker
                             mMap.addMarker(new MarkerOptions()
@@ -210,7 +211,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 } catch (Exception e){
                     e.printStackTrace();
                 }
-            }
+           // }
         }
     }
 
@@ -266,7 +267,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         System.out.println("distance: " + distance);
                         //set speed
                         TextView speed = (TextView) findViewById(R.id.speed);
-                        speed.setText(distance + " m/s");
+                        speed.setText(String.format("%.2f m/s",distance));
 
                         //update total distance
                         dist += distance;
