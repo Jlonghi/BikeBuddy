@@ -3,8 +3,9 @@
 
     <string-array name="searches">
         <item>Bike Stores</item>
-        <item>Indoor Parking</item>
-        <item>Outdoor Parking</item>
+        <!--<item>Indoor Parking</item>
+        <item>Outdoor Parking</item>-->
+        <item>Bike Share</item>
         <item>Ring Parking</item>
     </string-array>
     <string name="title_activity_other_maps">Map</string>
