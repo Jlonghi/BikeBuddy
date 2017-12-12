@@ -73,6 +73,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -80,6 +83,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Iterator;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -245,13 +250,46 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }catch(SecurityException e){}
 
         }
-        else if(spinner.getSelectedItem().toString() == "Indoor Parking"){
+        /*else if(spinner.getSelectedItem().toString() == "Indoor Parking"){
             Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
             toast.show();
         }
         else if(spinner.getSelectedItem().toString() == "Outdoor Parking"){
             Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
             toast.show();
+        }*/
+        else if(spinner.getSelectedItem().toString() == "Bike Share"){
+            InputStream is = getResources().openRawResource(R.raw.station_information);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            int ctr;
+            try{
+                ctr = is.read();
+                while(ctr != -1){
+                    byteArrayOutputStream.write(ctr);
+                    ctr = is.read();
+                }
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.v("text data", byteArrayOutputStream.toString());
+            try {
+                JSONObject bikeShare = new JSONObject(byteArrayOutputStream.toString());
+                JSONObject data =  bikeShare.getJSONObject("data");
+                JSONArray stations = data.getJSONArray("stations");
+
+                for(int i = 0; i < stations.length(); i++){
+                    LatLng latLng = new LatLng(stations.getJSONObject(i).getDouble("lat"),
+                            stations.getJSONObject(i).getDouble("lon"));
+                    mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(stations.getJSONObject(i).getString("address") + " Capacity: "
+                    + stations.getJSONObject(i).getString("capacity")));
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
         else if(spinner.getSelectedItem().toString().equals("Ring Parking")){
             //fetching file
