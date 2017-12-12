@@ -11,6 +11,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -26,9 +27,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -39,6 +45,13 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.location.places.GeoDataApi;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.PlaceDetectionApi;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -55,10 +68,18 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Iterator;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -73,6 +94,52 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FusedLocationProviderClient mFusedLocationProviderClient;
     LocationRequest mLocationRequest;
     boolean mRequestingLocationUpdates;
+
+    GeoDataClient mGeoDataClient;
+    PlaceDetectionClient mPlaceDetectionClient;
+    JSONObject jsonRes;
+    static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+    class RetrieveBikeStores extends AsyncTask<String, Void, String>{
+       protected String doInBackground(String... strUrl){
+            try {
+                URL url = new URL(strUrl[0]);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                String response = convertStreamToString(in);
+                return response;
+            }catch (IOException e){
+                return "exception thrown";
+            }
+        }
+        protected void onPostExecute(String res){
+            try{
+                System.out.println(res);
+                jsonRes = new JSONObject(res);
+                Iterator<?> keys = jsonRes.keys();
+                while(keys.hasNext()){
+                    String key = (String)keys.next();
+                    if(key.equals("results")) {
+                        JSONArray resultArray = (JSONArray)jsonRes.get(key);
+                        for(int i = 0; i < resultArray.length(); i++) {
+                            JSONObject resObj  = (JSONObject) resultArray.get(i);
+                            JSONObject geometry = (JSONObject) resObj.get("geometry");
+                            JSONObject loc = (JSONObject) geometry.get("location");
+                            LatLng latLng = new LatLng(Double.parseDouble(loc.get("lat").toString()),Double.parseDouble(loc.get("lng").toString()));
+                            //placing marker
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .title(resObj.get("name").toString()));
+                        }
+                    }
+                    else
+                        System.out.println(jsonRes.get(key).toString());
+                }
+            }catch(JSONException e){}
+        }
+    }
     //defining locationListener to track the persons location
     LocationListener locationListener = new LocationListener() {
         @Override
@@ -159,9 +226,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     //perform search on the map
     public void handleSearchButton(){
         Spinner spinner = (Spinner)findViewById(R.id.searchType);
-        if(spinner.getSelectedItem().toString() == "Bike Stores"){
+        if(spinner.getSelectedItem().toString().equals("Bike Stores")){
             Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
             toast.show();
+            try {
+                mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            LatLng curr = new LatLng(location.getLatitude(), location.getLongitude());
+                            //String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + location.getLatitude() + "," + location.getLongitude() + "&radius=500&type=bicycle_store&key=%20AIzaSyC4MUJhXp4fBBr2Tfi395Ea5ebP4Ot30Dc";
+                            new RetrieveBikeStores().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + location.getLatitude() + "," + location.getLongitude() + "&radius=1000&type=bicycle_store&key=%20AIzaSyC4MUJhXp4fBBr2Tfi395Ea5ebP4Ot30Dc");
+
+                        }
+                    }
+                });
+            }catch(SecurityException e){}
+
         }
         else if(spinner.getSelectedItem().toString() == "Indoor Parking"){
             Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
@@ -246,6 +328,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         sTime = SystemClock.elapsedRealtime();
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mGeoDataClient = Places.getGeoDataClient(this, null);
+
+        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+
 
         createLocationRequest();
 
