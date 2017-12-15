@@ -232,8 +232,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void handleSearchButton(){
         Spinner spinner = (Spinner)findViewById(R.id.searchType);
         if(spinner.getSelectedItem().toString().equals("Bike Stores")){
-            Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
-            toast.show();
+            //Toast toast = Toast.makeText(this, "Bike Stores to be implemented", Toast.LENGTH_SHORT);
+            //toast.show();
             try {
                 mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
@@ -259,10 +259,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             toast.show();
         }*/
         else if(spinner.getSelectedItem().toString() == "Bike Share"){
+            //getting station file
             InputStream is = getResources().openRawResource(R.raw.station_information);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
             int ctr;
+            //loading file information to create markers
             try{
                 ctr = is.read();
                 while(ctr != -1){
@@ -275,10 +277,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
             Log.v("text data", byteArrayOutputStream.toString());
             try {
+                //getting array of staions
                 JSONObject bikeShare = new JSONObject(byteArrayOutputStream.toString());
                 JSONObject data =  bikeShare.getJSONObject("data");
                 JSONArray stations = data.getJSONArray("stations");
 
+                //going through the array to create each bike sharing station marker
                 for(int i = 0; i < stations.length(); i++){
                     LatLng latLng = new LatLng(stations.getJSONObject(i).getDouble("lat"),
                             stations.getJSONObject(i).getDouble("lon"));
